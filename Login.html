@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Your Demo Therapist</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <form onsubmit="return login()">
+
+    <h1>Login</h1>
+
+    <div class="input-box">
+      <input type="text" id="username" placeholder="Username" required>
+      <i class='bx bxs-user'></i>
+    </div>
+
+    <div class="input-box">
+      <input type="password" id="password" placeholder="Password" required>
+      <i class='bx bxs-lock-alt'></i>
+    </div>
+
+    <div class="remember-forgot">
+      <label> <input type="checkbox">Remember Me </label>
+      <a href="#">Forgot Password</a>
+    </div>
+
+    <button type="submit" class="btn">Login</button>
+    <p class="disclaimer">
+  This is a student demo project and not a professional therapy service.
+  If you are in danger or feel unsafe, please seek help from a licensed professional immediately.
+</p>
+
+
+<script>
+function login() {
+    const usernameInput = document.getElementById('username').value.trim();
+    const passwordInput = document.getElementById('password').value;
+
+    // Read saved user data
+    const saved = JSON.parse(localStorage.getItem("userData"));
+
+    if (!saved) {
+        alert("No account found. Please register first.");
+        return false;
+    }
+
+    // Validate credentials
+    if (usernameInput === saved.username && passwordInput === saved.password) {
+        // SUCCESS → go to dashboard
+        window.location.href = "dashboard.html?user=" + encodeURIComponent(saved.username);
+        return false;
+    }
+
+    // If incorrect
+    alert("Invalid username or password");
+    return false;
+}
+</script>
+
+<div class="register-link">
+  <p>Don't have an account? <a href="index.html">Register</a></p>
+</div>
+
+  </form>
+  </div>
+  </body>
+</html>
