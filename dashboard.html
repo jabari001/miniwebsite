@@ -25,151 +25,170 @@
 
 
 <script>
-  // Get username from the URL
+  // ===== USER NAME =====
   const params = new URLSearchParams(window.location.search);
   const user = params.get('user');
-
-  document.getElementById('welcome').innerText = `Welcome, ${user}!`;
+  document.getElementById('welcome').innerText = `Welcome, ${user}! `;
 
   let conversationStep = 0;
 
-  //  QUESTION SETS 
-  const questionSets = [
+  // ===== DEPTH DETECTION =====
+  const depthWords = [
+    "months","years","long time","always","never","tired","exhausted",
+    "drained","alone","hopeless","broken","empty","scared","lost",
+    "job","relationship","divorce","death","grief",
+    "fear","pain","hurt","sad","depressed","anxious","anxiety","stressed"
+  ];
 
-    // SET 1
+  function containsDepth(text) {
+    return depthWords.some(word => text.toLowerCase().includes(word));
+  }
+
+  // ===== QUESTIONS =====
+  const questionSets = [
     [
       "What is the one thing that's hurting you the most right now?",
       "How does this pain affect your daily life when you're alone?",
       "If you could speak freely without being judged, what would you say?"
     ],
-
-    // SET 2
     [
       "What has been draining your strength lately?",
       "When was the last time you truly felt at peace?",
       "What do you wish you could walk away from right now?"
     ],
-
-    // SET 3
     [
       "Who is the person that has affected your heart the most?",
       "What did they do that still hurts you today?",
-      "If they were standing in front of you now and asked for a second chance, what would you tell them?"
+      "What would you tell them if they were listening?"
     ],
-
-    // SET 4
     [
       "What is your biggest fear about yourself?",
       "What negative thoughts do you tell yourself when no one is watching?",
-      "What do you think you are not 'good enough' for?"
+      "What do you think you are not good enough for?"
     ],
-
-    // SET 5
     [
       "What do you wish would change in your life right now?",
       "What is one thing you are secretly hoping for?",
-      "If your life could restart from today, what would you do differently?"
+      "If life restarted today, what would you do differently?"
     ]
   ];
 
-  //  COMFORT MESSAGES 
+  // ===== COMFORT =====
   const comfortingMessages = [
-    "You have been carrying this for a long time, and it shows how strong you really are. It’s okay to feel broken sometimes — healing doesn’t mean you were weak. You are not alone in this.",
-    "You’ve been trying so hard for so long, and it’s okay to be tired. You don’t have to have everything figured out today. Rest is not failure — it’s survival.",
-    "Some connections leave deep scars, and that pain is real. What you felt mattered. Even if they couldn’t love you the right way, you are still worthy of a gentle, faithful love.",
-    "You are not your fears or your worst thoughts. The voice that criticizes you is not the truth — it’s only pain talking. You are doing better than you believe.",
-    "Hope is growing in you, even if you can’t feel it yet. Every honest answer you gave today is proof that you want to heal. And that alone is powerful."
+    "You have been carrying this for a long time. You are not weak for feeling this way.",
+    "It’s okay to be tired. You don’t have to fix everything today.",
+    "What you felt mattered. Your pain is real.",
+    "You are not your worst thoughts. You are trying — and that matters.",
+    "Hope exists even when it feels far away."
   ];
 
-  //  DAILY LIMIT SYSTEM
-  const today = new Date().toLocaleDateString();
-  const lastVisitDate = localStorage.getItem("lastVisitDate");
+  // ===== VALIDATION =====
+  const validationMessages = [
+    "That sounds heavy. You don’t have to rush.",
+    "I hear you. You can take your time.",
+    "That must be exhausting to live with.",
+    "Thank you for trusting me with this."
+  ];
 
-  if (lastVisitDate === today) {
-    alert("You have already used today's session. Please come back tomorrow.");
-    document.getElementById('confession').disabled = true;
-    document.querySelector('button').disabled = true;
-    throw new Error("Session locked for today");
-  } else {
-    localStorage.setItem("lastVisitDate", today);
+  const deepFollowUps = [
+    "I'm happy to listen if, you can tell me more about it.",
+    "What has this been like emotionally?",
+    "What’s the hardest part of carrying this?",
+    "What do you wish people understood?"
+  ];
+
+  function randomFrom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
   }
-  
 
-  //  PICK NEW QUESTION SET
-  let lastSetIndex = localStorage.getItem("lastQuestionSet");
-  let newSetIndex;
+  // ===== DAILY LIMIT =====
+  const today = new Date().toLocaleDateString();
+  if (localStorage.getItem("lastVisitDate") === today) {
+    alert("You’ve already used today’s session. Please come back tomorrow.");
+    document.getElementById("confession").disabled = true;
+    document.querySelector("button").disabled = true;
+    throw new Error("Session locked");
+  }
+  localStorage.setItem("lastVisitDate", today);
 
+  // ===== PICK NEW QUESTION SET =====
+  let lastSet = localStorage.getItem("lastQuestionSet");
+  let newSet;
   do {
-    newSetIndex = Math.floor(Math.random() * questionSets.length);
-  } while (newSetIndex == lastSetIndex);
+    newSet = Math.floor(Math.random() * questionSets.length);
+  } while (newSet == lastSet);
 
-  localStorage.setItem("lastQuestionSet", newSetIndex);
+  localStorage.setItem("lastQuestionSet", newSet);
 
-  const questions = questionSets[newSetIndex];
-  const responseBox = document.getElementById('response-box');
+  const questions = questionSets[newSet];
+  const responseBox = document.getElementById("response-box");
 
-  // Show first question
+  // ===== TYPING EFFECT =====
+  function typeText(el, text, speed = 60) {
+    el.innerHTML = "";
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        el.innerHTML += text.charAt(i);
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+  }
+
+  // ===== SHOW FIRST QUESTION =====
   const firstQ = document.createElement("p");
-firstQ.innerHTML = "<em></em>";
-responseBox.appendChild(firstQ);
+  firstQ.classList.add("question");
+  firstQ.innerHTML = "<em></em>";
+  responseBox.appendChild(firstQ);
+  typeText(firstQ.querySelector("em"), questions[0]);
 
-typeText(firstQ.querySelector("em"), questions[0]);
-
-
-function typeText(element, text, speed = 80) {
-  element.innerHTML = "";
-  let i = 0;
-
-  const typing = setInterval(() => {
-    if (i < text.length) {
-      element.innerHTML += text.charAt(i);
-      i++;
-    } else {
-      clearInterval(typing);
-    }
-  }, speed);
-}
-
+  // ===== MAIN FUNCTION =====
   function sendConfession() {
-    const confession = document.getElementById('confession').value.trim();
+    const input = document.getElementById("confession");
+    const text = input.value.trim();
 
-    if (confession === "") {
-      alert("Please write something before sending.");
+    if (text === "") return alert("Please write something.");
+
+    responseBox.innerHTML += `<p class="answer"><strong>You:</strong> ${text}</p>`;
+
+    //  EMOTIONAL PAUSE
+    if (containsDepth(text)) {
+      responseBox.innerHTML += `
+        <p class="therapist">
+          <em>${randomFrom(validationMessages)}</em><br>
+          <em>${randomFrom(deepFollowUps)}</em>
+        </p>
+      `;
+      input.rows = 6;
+      input.placeholder = "You can write more here...";
+      input.value = "";
       return;
     }
 
-    const wordCount = confession.split(" ").filter(word => word.length > 1).length;
-    const hasLetter = /[a-zA-Z]/.test(confession);
-
-    if (!hasLetter || wordCount < 3) {
-      alert("Please write something meaningful that I can understand.");
-      return;
-    }
-
-    responseBox.innerHTML += `<p><strong>You:</strong> ${confession}</p>`;
-
+    // NEXT QUESTION 
     if (conversationStep < questions.length - 1) {
       conversationStep++;
-     const nextQ = document.createElement("p");
-nextQ.innerHTML = "<em></em>";
-responseBox.appendChild(nextQ);
 
-typeText(nextQ.querySelector("em"), questions[conversationStep]);
+      const q = document.createElement("p");
+      q.classList.add("question");
+      q.innerHTML = "<em></em>";
+      responseBox.appendChild(q);
 
+      typeText(q.querySelector("em"), questions[conversationStep]);
+
+      input.rows = 2;
+      input.placeholder = "Write here...";
     } else {
-      const matchedComfort = comfortingMessages[newSetIndex];
-      responseBox.innerHTML += `<p class="comfort"><em>${matchedComfort}</em></p>`;
-
-      document.getElementById('confession').disabled = true;
-      document.querySelector('button').disabled = true;
+      responseBox.innerHTML += `<p class="comfort"><em>${comfortingMessages[newSet]}</em></p>`;
+      input.disabled = true;
+      document.querySelector("button").disabled = true;
     }
 
-    document.getElementById('confession').value = "";
+    input.value = "";
   }
 </script>
-
-
-
 
 </body>
 </html>
